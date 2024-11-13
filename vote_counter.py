@@ -1,30 +1,39 @@
 import csv
 
-def count_votes(file_path):
+# Extraccion de Metodos 
+def process_votes(file_path):
     results = {}
-    
     with open(file_path, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',')
-        next(reader)  # Skip the header
+        reader = csv.reader(csvfile)
+        next(reader) 
 
-        for row in reader:
-            city = row[0]
-            candidate = row[1]
-            try:
-            	votes = int(row[2])
-            except:
-                votes = 0
-            
-            if candidate in results:
-                results[candidate] += votes
-            else:
-                results[candidate] = votes
+        # Renombrar las variables de las filas para saber que fila esta iterando
+        for city, candidate, vote_count in reader:
+            # Simplificacion de condicionales
+            votes = int(vote_count) if vote_count.isdigit() else 0
+            # Simplificacion de codigo al utilizar el get
+            results[candidate] = results.get(candidate, 0) + votes
+    return results
 
+def display_results(results):
     for candidate, total_votes in results.items():
         print(f"{candidate}: {total_votes} votes")
 
-    sortedbyvotes = sorted(results.items(), key=lambda item:item[1], reverse=True)
-    print(f"winner is {sortedbyvotes[0][0]}")
+def find_winner(results):
+    # utilizar max en lugar de sorted para simplificar
+    max_votes = max(results.values())
+    winners = [candidate for candidate, votes in results.items() if votes == max_votes]
+    return winners
+
+
+def count_votes(file_path):
+    results = process_votes(file_path)
+    display_results(results)
+    winners = find_winner(results)
+    if len(winners) == 1:
+        print(f"winner is {winners[0]}")
+    else:
+        print("it's a tie between: " + winners[0] + ", " + winners[1])
 
 # Example usage
 count_votes('votes.csv')
